@@ -22,7 +22,7 @@ namespace SZGYA_FelelviEredmenyek_20231107
                     tanulok.Add(new Tanulo(sor, tantargyak));
                 }
             }
-
+            sr.Close();
             Console.WriteLine($"1.feladat: osztályátlag: {osszAtlag(tanulok)}");
             foreach (var x in tantargyAtlag(tanulok))
             {
@@ -38,11 +38,18 @@ namespace SZGYA_FelelviEredmenyek_20231107
                 Console.WriteLine($"3.feladat: \n\t{angolHarmas}");
             }
 
-            Console.Write("4.feladat: Írja be a tanuló nevét:");
+            Console.Write("4.feladat: Írja be a tanuló nevét: ");
             string tanuloNev = Console.ReadLine();
-            KeyValuePair<string, int> legjobb = legjobbTantargy(tanuloNev, tanulok);
-            
-
+            var (legjobb, lTan) = legjobbTantargy(tanuloNev, tanulok);
+            if(legjobb.Key == null)
+            {
+                Console.WriteLine("[HIBA] nincs ilyen");
+                return;
+            }
+            Console.WriteLine(legjobb);
+            var sw = new StreamWriter("../../../src/legjobb.txt", false, Encoding.UTF8);
+            sw.WriteLine($"{lTan.Nev}\t{lTan.Azonosito}");
+            sw.Close();
         }
 
         static double osszAtlag(List<Tanulo> tanulok)
@@ -65,14 +72,14 @@ namespace SZGYA_FelelviEredmenyek_20231107
             return tanulok.FirstOrDefault(t => t.Jegyek["Angol nyelv"] == 3);
         }
 
-        static KeyValuePair<string,int> legjobbTantargy(string nev, List<Tanulo> tanulok)
+        static (KeyValuePair<string,int>, Tanulo) legjobbTantargy(string nev, List<Tanulo> tanulok)
         {
             Tanulo legjobb = tanulok.FirstOrDefault(t => t.Nev.ToLower() == nev.ToLower());
             if (legjobb == null)
             {
-                return new KeyValuePair<string, int>(null,0);
+                return (new KeyValuePair<string, int>(null,0),null);
             }
-            return legjobb.Jegyek.First(j => j.Value == legjobb.Jegyek.Max(j => j.Value));
+            return (legjobb.Jegyek.First(j => j.Value == legjobb.Jegyek.Max(j => j.Value)), legjobb);
         }
     }
 }
